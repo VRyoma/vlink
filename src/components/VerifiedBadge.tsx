@@ -14,8 +14,8 @@ export function VerifiedBadge({ className = '', size = 'md' }: VerifiedBadgeProp
 
   return (
     <BadgeCheck
-      className={` text-blue-500 inline-block `}
-      aria-label="Verified YouTube Creator"
+      className={`${sizeClasses[size]} text-blue-500 inline-block ${className}`}
+      aria-label="認証済みクリエイター"
     />
   )
 }

@@ -9,11 +9,11 @@ export default function Home() {
         <div className="text-center space-y-8">
           <div className="space-y-4">
             <h1 className="text-5xl md:text-6xl font-bold text-gray-900 dark:text-white">
-              Create Your Link in Bio
+              自分だけのリンク集を、もっと身近に。
             </h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-2xl mx-auto">
-              Share all your important links in one place. Connect your YouTube channel
-              and get verified automatically.
+              大切なリンクを1ヶ所に。YouTubeチャンネルを連携するだけで、
+              クリエイター認証バッジが自動で付与されます。
             </p>
           </div>
 
@@ -24,7 +24,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white font-medium py-3 px-8 rounded-lg transition-colors text-lg"
             >
               <LogIn className="w-5 h-5" />
-              Login
+              ログイン
             </Link>
 
             <Link
@@ -32,7 +32,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-700 dark:text-white font-medium py-3 px-8 rounded-lg border-2 border-purple-600 transition-colors text-lg"
             >
               <UserPlus className="w-5 h-5" />
-              Create Account
+              アカウント作成
             </Link>
           </div>
 
@@ -43,10 +43,10 @@ export default function Home() {
                 <UserPlus className="w-6 h-6 text-purple-600 dark:text-purple-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Easy Setup
+                かんたん設定
               </h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
-                Create your profile in minutes with Google login
+                Googleログインで数分以内にプロフィールを作成
               </p>
             </div>
 
@@ -60,10 +60,10 @@ export default function Home() {
                 </svg>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                YouTube Integration
+                YouTube 連携
               </h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
-                Connect your channel and get verified badge automatically
+                チャンネルを連携して、認証済みバッジを自動取得
               </p>
             </div>
 
@@ -72,10 +72,10 @@ export default function Home() {
                 <Github className="w-6 h-6 text-pink-600 dark:text-pink-400" />
               </div>
               <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                Open Source
+                オープンソース
               </h3>
               <p className="text-gray-600 dark:text-gray-300 text-sm">
-                Host it yourself, own your data
+                自分でホスト可能。データはあなたのものです
               </p>
             </div>
           </div>
@@ -89,7 +89,7 @@ export default function Home() {
               className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               <Github className="w-5 h-5" />
-              View on GitHub
+              GitHubで見る
             </Link>
           </div>
         </div>

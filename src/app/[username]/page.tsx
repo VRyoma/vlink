@@ -70,7 +70,7 @@ async function BioPage({ username }: { username: string }) {
                 className="inline-flex items-center gap-2 mt-3 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium"
               >
                 <ExternalLink className="w-4 h-4" />
-                YouTube Channel
+                YouTube チャンネル
               </a>
             )}
 
@@ -84,7 +84,7 @@ async function BioPage({ username }: { username: string }) {
         </div>
 
         {/* Links Section */}
-        {links && links && links.length > 0 && (
+        {links && links.length > 0 && (
           <div className="mt-8 space-y-3">
             {links.map((link: LinkType) => (
               <a
@@ -128,12 +128,12 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
 
   if (!profile) {
     return {
-      title: 'Profile Not Found',
+      title: 'プロフィールが見つかりません',
     }
   }
 
   return {
-    title: `${profile.display_name || resolvedParams.username} - Link in Bio`,
-    description: profile.bio || `Check out ${profile.display_name || resolvedParams.username}'s links`,
+    title: `${profile.display_name || resolvedParams.username} - リンク集`,
+    description: profile.bio || `${profile.display_name || resolvedParams.username}のリンク一覧`,
   }
 }
