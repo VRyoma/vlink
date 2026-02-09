@@ -4,6 +4,13 @@ export interface Profile {
   display_name: string | null
   bio: string | null
   avatar_url: string | null
+  is_verified: boolean
+  youtube_handle: string | null
+  youtube_channel_id: string | null
+  youtube_channel_url: string | null
+  auth_provider: string
+  created_at: string
+  updated_at: string
 }
 
 export interface Link {

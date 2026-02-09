@@ -37,7 +37,12 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/admin/auth/callback`
+        redirectTo: `${window.location.origin}/admin/auth/callback`,
+        scopes: 'email profile https://www.googleapis.com/auth/youtube.readonly',
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
       }
     })
 
