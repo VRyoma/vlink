@@ -3,7 +3,7 @@ import { NextResponse, type NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
   const requestHeaders = new Headers(request.headers)
-  
+
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -12,6 +12,12 @@ export async function middleware(request: NextRequest) {
         get(name: string) {
           return request.cookies.get(name)?.value
         },
+        set(name: string, value: string, options: any) {
+          requestHeaders.append('Set-Cookie', `${name}=${value}; Path=/; HttpOnly; SameSite=Lax; Secure`)
+        },
+        remove(name: string, options: any) {
+          requestHeaders.append('Set-Cookie', `${name}=; Max-Age=0; Path=/; HttpOnly; SameSite=Lax; Secure`)
+        },
       },
     }
   )
@@ -19,7 +25,8 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser()
 
   const isAuthPage = request.nextUrl.pathname.startsWith('/admin/login')
-  const isAdminPage = request.nextUrl.pathname.startsWith('/admin') && !request.nextUrl.pathname.startsWith('/admin/login')
+  const isCallbackPage = request.nextUrl.pathname.startsWith('/admin/auth/callback')
+  const isAdminPage = request.nextUrl.pathname.startsWith('/admin') && !isAuthPage && !isCallbackPage
 
   if (isAdminPage && !user) {
     const redirectUrl = new URL('/admin/login', request.url)
