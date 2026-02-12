@@ -83,7 +83,7 @@ export default function Home() {
           {/* Footer */}
           <div className="mt-16 pt-8 border-t border-gray-200 dark:border-gray-700">
             <Link
-              href="https://github.com/VRyoma/vbio"
+              href="https://github.com/VRyoma/vlink"
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-2 text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
