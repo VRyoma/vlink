@@ -5,11 +5,6 @@ import { fetchYouTubeChannel } from '@/lib/youtube'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
-
-  if (!code) {
-    return NextResponse.redirect(new URL('/admin/login', requestUrl.origin))
-  }
 
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
@@ -39,21 +34,21 @@ export async function GET(request: Request) {
     }
   )
 
-  const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+  const { data: { user, session }, error: authError } = await supabase.auth.getUser()
 
-  if (error || !data.session) {
-    console.error('Auth error:', error)
+  if (authError || !user) {
+    console.error('Auth error:', authError)
     return NextResponse.redirect(new URL('/admin/login?error=auth_failed', requestUrl.origin))
   }
 
-  // Fetch YouTube channel data
-  if (data.session?.access_token) {
+  // Fetch YouTube channel data using provider_token if available
+  if (session?.provider_token) {
     try {
-      const youtubeData = await fetchYouTubeChannel(data.session.access_token)
+      const youtubeData = await fetchYouTubeChannel(session.provider_token)
 
       // Update user profile with YouTube data
       await supabase.from('profiles').upsert({
-        id: data.user.id,
+        id: user.id,
         is_verified: true,
         youtube_channel_id: youtubeData.channelId,
         youtube_handle: youtubeData.handle,
@@ -66,6 +61,6 @@ export async function GET(request: Request) {
     }
   }
 
-  // Redirect to admin - the session cookie should already be set by Supabase
+  // Redirect to admin
   return NextResponse.redirect(new URL('/admin', requestUrl.origin))
 }
