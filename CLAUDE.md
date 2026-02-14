@@ -100,4 +100,31 @@ export default async function Page() {
 ```
 
 #### Dynamic Profile Pages
-Dynamic routes at `/{username}` use Edge Runtime. The profile page fetches user data and displays their links with the verified badge if applicable.
+Dynamic routes at `/{username}` use Edge Runtime for server-side rendering:
+- Fetches user data and links in real-time
+- Uses `@/components/VerifiedBadge` for creator verification
+- Supports both light and dark themes with gradient backgrounds
+- Use `notFound()` from Next.js for missing user profiles
+
+### Fediverse Integration
+The app supports Fediverse integration through WebFinger:
+- WebFinger endpoint: `/.well-known/webfinger` - Responds to `acct:username@domain` requests
+- Supports ActivityPub protocol integration
+- Generates JSON responses compatible with Mastodon and other Fediverse platforms
+
+### Configuration Files
+- `middleware.ts` - Protects `/admin/*` routes, handles auth redirects
+- `next.config.ts` - Minimal config, Cloudflare Pages compatibility
+- `wrangler.jsonc` - Cloudflare Workers configuration for deployment
+- `open-next.config.ts` - OpenNext adapter config for Cloudflare
+- `tsconfig.json` - TypeScript config with `@/*` path aliases
+
+### Error Handling
+- Use `notFound()` from Next.js for missing user profiles
+- Admin login failures redirect with `?error=auth_failed` parameter
+- YouTube API errors are caught and logged but don't break authentication flow
+
+### Accessibility
+- VerifiedBadge component includes `aria-label` for screen readers
+- All external links use `rel="noopener noreferrer"`
+- Profile images have descriptive `alt` text

@@ -34,7 +34,8 @@ export async function GET(request: Request) {
     }
   )
 
-  const { data: { user, session }, error: authError } = await supabase.auth.getUser()
+  const { data: { user }, error: authError } = await supabase.auth.getUser()
+  const { data: { session } } = await supabase.auth.getSession()
 
   if (authError || !user) {
     console.error('Auth error:', authError)
