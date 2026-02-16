@@ -8,7 +8,6 @@ export default function RegisterPage() {
   const router = useRouter()
   const [formData, setFormData] = useState({
     username: '',
-    email: '',
     password: '',
     displayName: '',
   })
@@ -42,15 +41,19 @@ export default function RegisterPage() {
         return
       }
 
+      // Generate dummy email for Supabase Auth (email is required by Supabase)
+      const dummyEmail = `${formData.username}@noemail.local`
+
       // Sign up user with Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
+        email: dummyEmail,
         password: formData.password,
         options: {
           data: {
             username: formData.username,
             display_name: formData.displayName,
           },
+          emailRedirectTo: undefined, // Disable email confirmation
         },
       })
 
@@ -125,21 +128,6 @@ export default function RegisterPage() {
               required
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
               placeholder="あなたの名前"
-            />
-          </div>
-
-          <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              メールアドレス *
-            </label>
-            <input
-              id="email"
-              type="email"
-              value={formData.email}
-              onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              required
-              className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
-              placeholder="you@example.com"
             />
           </div>
 
