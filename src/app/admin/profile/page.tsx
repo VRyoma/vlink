@@ -79,25 +79,51 @@ export default function ProfileEditPage() {
     setMessage('')
     setErrorMessage('')
 
-    const { error } = await supabase
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setErrorMessage('セッションが切れました。再ログインしてください。')
+      setLoading(false)
+      return
+    }
+
+    // Try to update first, using the ID
+    const { error: updateError } = await supabase
       .from('profiles')
-      .upsert({
-        id: profile.id,
-        username: profile.username,
+      .update({
         display_name: displayName || null,
         bio: bio || null,
         avatar_url: avatarUrl || null,
         updated_at: new Date().toISOString(),
       })
+      .eq('id', user.id)
 
-    setLoading(false)
+    if (updateError) {
+      // If update fails because row doesn't exist, try insert (upsert fallback)
+      console.log('Update failed, attempting upsert...')
+      const { error: upsertError } = await supabase
+        .from('profiles')
+        .upsert({
+          id: user.id,
+          username: profile.username || user.user_metadata.username,
+          display_name: displayName || null,
+          bio: bio || null,
+          avatar_url: avatarUrl || null,
+          updated_at: new Date().toISOString(),
+        }, { onConflict: 'id' })
 
-    if (error) {
-      setErrorMessage('エラーが発生しました: ' + error.message)
+      if (upsertError) {
+        setErrorMessage('エラーが発生しました: ' + upsertError.message)
+      } else {
+        setMessage('プロフィールを保存しました！')
+        setTimeout(() => setMessage(''), 3000)
+      }
     } else {
       setMessage('プロフィールを保存しました！')
       setTimeout(() => setMessage(''), 3000)
     }
+
+    setLoading(false)
+    await loadProfile()
   }
 
   const handleUploadClick = () => {
