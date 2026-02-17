@@ -43,15 +43,36 @@ export async function GET(request: Request) {
         try {
           const youtubeData = await fetchYouTubeChannel(session.provider_token)
           
+          const youtubeUrl = `https://www.youtube.com/channel/${youtubeData.channelId}`
+          
           await supabase.from('profiles').upsert({
             id: session.user.id,
             is_verified: true,
             youtube_channel_id: youtubeData.channelId,
             youtube_handle: youtubeData.handle,
-            youtube_channel_url: `https://www.youtube.com/channel/${youtubeData.channelId}`,
+            youtube_channel_url: youtubeUrl,
             auth_provider: 'google',
             updated_at: new Date().toISOString(),
           })
+
+          // Automatically add YouTube to links if not already present
+          const { data: existingLink } = await supabase
+            .from('links')
+            .select('id')
+            .eq('user_id', session.user.id)
+            .ilike('title', '%YouTube%')
+            .single()
+
+          if (!existingLink) {
+            await supabase.from('links').insert({
+              user_id: session.user.id,
+              title: 'YouTube',
+              url: youtubeUrl,
+              icon_key: 'Youtube',
+              sort_order: 0,
+              is_visible: true,
+            })
+          }
         } catch (err) {
           console.error('Failed to fetch/update YouTube data:', err)
           // Continue login even if YouTube fetch fails

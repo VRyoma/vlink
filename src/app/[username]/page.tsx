@@ -1,11 +1,24 @@
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 import { Profile, Link as LinkType } from '@/types/supabase'
-import { Link, ExternalLink } from 'lucide-react'
+import { Link, ExternalLink, Github, Twitter, Youtube, Instagram, Globe, Mail } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { VerifiedBadge } from '@/components/VerifiedBadge'
 import MfmRenderer from '@/components/MfmRenderer'
+
+const IconRenderer = ({ iconKey }: { iconKey: string | null }) => {
+  if (!iconKey) return <Link className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+  
+  const key = iconKey.toLowerCase()
+  if (key.includes('github')) return <Github className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+  if (key.includes('twitter') || key.includes('x')) return <Twitter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+  if (key.includes('youtube')) return <Youtube className="w-4 h-4 text-red-500" />
+  if (key.includes('instagram')) return <Instagram className="w-4 h-4 text-pink-500" />
+  if (key.includes('mail')) return <Mail className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+  
+  return <Globe className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+}
 
 function ProfileFallback() {
   return (
@@ -114,10 +127,13 @@ async function BioPage({ username }: { username: string }) {
                 className="block w-full bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200"
               >
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-gray-900 dark:text-white">
-                    {link.title}
-                  </span>
-                  <Link className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+                  <div className="flex items-center gap-3">
+                    <IconRenderer iconKey={link.icon_key} />
+                    <span className="font-medium text-gray-900 dark:text-white">
+                      {link.title}
+                    </span>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
                 </div>
               </a>
             ))}

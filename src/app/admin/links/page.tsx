@@ -56,14 +56,35 @@ export default function LinksManagePage() {
             const { data: { user } } = await supabase.auth.getUser()
             if (user) {
               const youtubeData = await fetchYouTubeChannel(providerToken)
+              const youtubeUrl = `https://www.youtube.com/channel/${youtubeData.channelId}`
+              
               await supabase.from('profiles').update({
                 is_verified: true,
                 youtube_channel_id: youtubeData.channelId,
                 youtube_handle: youtubeData.handle,
-                youtube_channel_url: `https://www.youtube.com/channel/${youtubeData.channelId}`,
+                youtube_channel_url: youtubeUrl,
                 auth_provider: 'google',
                 updated_at: new Date().toISOString(),
               }).eq('id', user.id)
+
+              // Automatically add YouTube to links if not already present
+              const { data: existingLink } = await supabase
+                .from('links')
+                .select('id')
+                .eq('user_id', user.id)
+                .ilike('title', '%YouTube%')
+                .single()
+
+              if (!existingLink) {
+                await supabase.from('links').insert({
+                  user_id: user.id,
+                  title: 'YouTube',
+                  url: youtubeUrl,
+                  icon_key: 'Youtube',
+                  sort_order: 0,
+                  is_visible: true,
+                })
+              }
 
               setMessage('YouTubeチャンネルと連携しました！')
               window.history.replaceState({}, document.title, window.location.pathname)
