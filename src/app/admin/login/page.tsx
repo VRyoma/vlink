@@ -9,15 +9,35 @@ export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
+  const [successMessage, setSuccessMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
+<<<<<<< HEAD
+=======
+  // Check for error param from failed OAuth callback or registration
+  useEffect(() => {
+    const errorParam = searchParams.get('error')
+    if (errorParam === 'auth_failed') {
+      setError('ログインに失敗しました。もう一度お試しください。')
+    }
+    // Show success message if registered
+    if (searchParams.get('registered') === 'true') {
+      setSuccessMessage('登録完了しました。ログインしてください。')
+    }
+  }, [searchParams])
+
+>>>>>>> temp-fix
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
+    setSuccessMessage('')
     setLoading(true)
 
+    // Handle ID login by converting to dummy email if necessary
+    const loginIdentifier = email.includes('@') ? email : `${email}@noemail.local`
+
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: loginIdentifier,
       password,
     })
 
@@ -58,22 +78,23 @@ export default function LoginPage() {
         <h1 className="text-2xl font-bold text-center text-gray-900 dark:text-white mb-6">
           管理画面ログイン
         </h1>
-        
+
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              メールアドレス
+              ID または メールアドレス
             </label>
             <input
               id="email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+              placeholder="your-id"
             />
           </div>
-          
+
           <div>
             <label htmlFor="password" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
               パスワード
@@ -87,13 +108,19 @@ export default function LoginPage() {
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
             />
           </div>
-          
+
+          {successMessage && (
+            <div className="bg-green-100 border border-green-400 text-green-700 px-4 py-2 rounded">
+              {successMessage}
+            </div>
+          )}
+
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded">
               {error}
             </div>
           )}
-          
+
           <button
             type="submit"
             disabled={loading}
@@ -126,6 +153,15 @@ export default function LoginPage() {
             </svg>
             Googleでログイン
           </button>
+        </div>
+
+        <div className="mt-4 text-center">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            アカウントをお持ちでないですか？{' '}
+            <a href="/admin/register" className="text-purple-600 hover:text-purple-700 dark:text-purple-400">
+              新規登録
+            </a>
+          </p>
         </div>
       </div>
     </div>
