@@ -83,7 +83,7 @@ export default function ProfileEditPage() {
       return
     }
 
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', user.id)
@@ -94,6 +94,21 @@ export default function ProfileEditPage() {
       setDisplayName(data.display_name || '')
       setBio(data.bio || '')
       setAvatarUrl(data.avatar_url || '')
+    } else {
+      // If no profile in DB, use data from Auth metadata
+      setProfile({
+        id: user.id,
+        username: user.user_metadata.username || '',
+        display_name: user.user_metadata.display_name || '',
+        bio: '',
+        avatar_url: '',
+        is_verified: false,
+        youtube_handle: null,
+        youtube_channel_id: null,
+        youtube_channel_url: null,
+        auth_provider: 'email'
+      })
+      setDisplayName(user.user_metadata.display_name || '')
     }
   }
 

@@ -73,7 +73,8 @@ export default function RegisterPage() {
         })
 
         if (profileError) {
-          setError('プロフィール作成に失敗しました')
+          console.error('Profile creation error:', profileError)
+          setError(`プロフィール作成に失敗しました: ${profileError.message}`)
           setLoading(false)
           return
         }
