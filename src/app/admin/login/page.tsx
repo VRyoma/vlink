@@ -1,19 +1,18 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 
 export default function LoginPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-<<<<<<< HEAD
-=======
   // Check for error param from failed OAuth callback or registration
   useEffect(() => {
     const errorParam = searchParams.get('error')
@@ -26,7 +25,6 @@ export default function LoginPage() {
     }
   }, [searchParams])
 
->>>>>>> temp-fix
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')

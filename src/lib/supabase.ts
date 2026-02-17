@@ -1,16 +1,4 @@
 import { createBrowserClient } from '@supabase/ssr'
-<<<<<<< HEAD
-
-export const createClient = () =>
-  createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-  )
-
-// Export a singleton instance for backward compatibility with existing code
-// that imports `supabase` directly.
-export const supabase = createClient()
-=======
 import type { SupabaseClient } from '@supabase/supabase-js'
 
 // Create a memoized browser client that stores sessions in cookies (not localStorage)
@@ -37,4 +25,3 @@ export const supabase = new Proxy({} as SupabaseClient, {
 
 // Export the factory function for explicit control
 export { createSupabaseClient as getClient }
->>>>>>> temp-fix
