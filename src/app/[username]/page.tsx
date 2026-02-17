@@ -67,78 +67,97 @@ async function BioPage({ username }: { username: string }) {
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
 
+  const themeColor = profile.theme_color || '#ffffff'
+  const backgroundUrl = profile.background_url
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900">
-      <div className="max-w-md mx-auto px-6 py-12">
-        {/* Profile Section */}
-        <div className="flex flex-col items-center gap-6">
-          {profile.avatar_url && (
-            <img
-              src={profile.avatar_url}
-              alt={profile.display_name || profile.username}
-              className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
-            />
-          )}
-
-          <div className="text-center">
-            {/* Name with Verified Badge */}
-            <div className="flex items-center justify-center gap-2">
-              <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-                {profile.display_name || profile.username}
-              </h1>
-              {profile.is_verified && <VerifiedBadge size="lg" />}
-            </div>
-
-            <p className="text-gray-600 dark:text-gray-300 mt-2">
-              @{profile.username}
-            </p>
-
-            {/* YouTube Link */}
-            {profile.youtube_channel_url && (
-              <a
-                href={profile.youtube_channel_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 mt-3 text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 font-medium"
-              >
-                <ExternalLink className="w-4 h-4" />
-                YouTube チャンネル
-              </a>
-            )}
-
-            {/* Bio */}
-            {profile.bio && (
-              <div className="text-gray-700 dark:text-gray-400 mt-3 px-4">
-                <MfmRenderer text={profile.bio} />
+    <div 
+      className="min-h-screen transition-colors duration-500"
+      style={{ 
+        backgroundColor: themeColor,
+        backgroundImage: backgroundUrl ? `url(${backgroundUrl})` : 'none',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundAttachment: 'fixed'
+      }}
+    >
+      {/* Overlay for better readability if background image is present */}
+      <div className={`min-h-screen w-full py-12 px-6 ${backgroundUrl ? 'bg-black/20 backdrop-blur-[2px]' : ''}`}>
+        <div className="max-w-md mx-auto">
+          {/* Profile Section */}
+          <div className="flex flex-col items-center gap-6">
+            {profile.avatar_url ? (
+              <img
+                src={profile.avatar_url}
+                alt={profile.display_name || profile.username}
+                className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg"
+              />
+            ) : (
+              <div className="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center border-4 border-white shadow-lg">
+                <IconRenderer iconKey={null} />
               </div>
             )}
-          </div>
-        </div>
 
-        {/* Links Section */}
-        {links && links.length > 0 && (
-          <div className="mt-8 space-y-3">
-            {links.map((link: LinkType) => (
-              <a
-                key={link.id}
-                href={link.url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="block w-full bg-white dark:bg-gray-800 rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow duration-200"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <IconRenderer iconKey={link.icon_key} />
-                    <span className="font-medium text-gray-900 dark:text-white">
-                      {link.title}
-                    </span>
-                  </div>
-                  <ExternalLink className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+            <div className="text-center">
+              {/* Name with Verified Badge */}
+              <div className="flex items-center justify-center gap-2">
+                <h1 className="text-2xl font-bold text-gray-900 drop-shadow-sm">
+                  {profile.display_name || profile.username}
+                </h1>
+                {profile.is_verified && <VerifiedBadge size="lg" />}
+              </div>
+
+              <p className="text-gray-600 font-medium mt-1">
+                @{profile.username}
+              </p>
+
+              {/* YouTube Link */}
+              {profile.youtube_channel_url && (
+                <a
+                  href={profile.youtube_channel_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 mt-3 text-red-600 hover:text-red-700 font-bold bg-white/80 px-3 py-1 rounded-full text-sm shadow-sm"
+                >
+                  <Youtube className="w-4 h-4" />
+                  YouTube チャンネル
+                </a>
+              )}
+
+              {/* Bio */}
+              {profile.bio && (
+                <div className="text-gray-800 mt-4 px-4 py-2 bg-white/40 backdrop-blur-md rounded-xl shadow-sm border border-white/20">
+                  <MfmRenderer text={profile.bio} />
                 </div>
-              </a>
-            ))}
+              )}
+            </div>
           </div>
-        )}
+
+          {/* Links Section */}
+          {links && links.length > 0 && (
+            <div className="mt-8 space-y-4">
+              {links.map((link: LinkType) => (
+                <a
+                  key={link.id}
+                  href={link.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="group block w-full bg-white/90 hover:bg-white backdrop-blur-sm rounded-2xl p-4 shadow-sm hover:shadow-md transition-all duration-200 border border-white/50 transform hover:-translate-y-0.5"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <IconRenderer iconKey={link.icon_key} />
+                      <span className="font-bold text-gray-800">
+                        {link.title}
+                      </span>
+                    </div>
+                    <ExternalLink className="w-4 h-4 text-gray-400 opacity-0 group-hover:opacity-100 transition-opacity" />
+                  </div>
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )

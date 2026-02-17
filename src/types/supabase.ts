@@ -9,6 +9,8 @@ export interface Profile {
   youtube_channel_id: string | null
   youtube_channel_url: string | null
   auth_provider: string
+  theme_color: string | null
+  background_url: string | null
   created_at: string
   updated_at: string
 }

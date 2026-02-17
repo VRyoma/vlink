@@ -10,6 +10,8 @@ CREATE TABLE IF NOT EXISTS public.profiles (
   youtube_channel_id TEXT,
   youtube_channel_url TEXT,
   auth_provider TEXT DEFAULT 'email',
+  theme_color TEXT DEFAULT '#ffffff',
+  background_url TEXT,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
