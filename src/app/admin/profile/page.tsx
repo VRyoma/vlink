@@ -43,6 +43,7 @@ export default function ProfileEditPage() {
   const bgInputRef = useRef<HTMLInputElement>(null)
   
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [username, setUsername] = useState('')
   const [displayName, setDisplayName] = useState('')
   const [bio, setBio] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
@@ -74,15 +75,17 @@ export default function ProfileEditPage() {
 
     if (data) {
       setProfile(data)
+      setUsername(data.username || '')
       setDisplayName(data.display_name || '')
       setBio(data.bio || '')
       setAvatarUrl(data.avatar_url || '')
       setThemeColor(data.theme_color || '#ffffff')
       setBackgroundUrl(data.background_url || '')
     } else {
+      const defaultUsername = user.user_metadata.username || `user_${user.id.slice(0, 5)}`
       setProfile({
         id: user.id,
-        username: user.user_metadata.username || '',
+        username: defaultUsername,
         display_name: user.user_metadata.display_name || '',
         bio: '',
         avatar_url: '',
@@ -94,6 +97,7 @@ export default function ProfileEditPage() {
         youtube_channel_url: null,
         auth_provider: 'email'
       })
+      setUsername(defaultUsername)
       setDisplayName(user.user_metadata.display_name || '')
     }
   }
@@ -114,6 +118,7 @@ export default function ProfileEditPage() {
     }
 
     const updateData = {
+      username: username || profile.username,
       display_name: displayName || null,
       bio: bio || null,
       avatar_url: avatarUrl || null,
@@ -241,8 +246,15 @@ export default function ProfileEditPage() {
             {/* Basic Info */}
             <div className="grid gap-4">
               <div>
-                <label className="block text-sm font-medium mb-1">ユーザーID（固定）</label>
-                <input type="text" value={profile?.username || ''} disabled className="w-full px-3 py-2 border rounded-lg bg-gray-100 dark:bg-gray-700 opacity-60 cursor-not-allowed" />
+                <label className="block text-sm font-medium mb-1">ユーザーID (URLに使用)</label>
+                <input 
+                  type="text" 
+                  value={username} 
+                  onChange={(e) => setUsername(e.target.value)}
+                  className="w-full px-3 py-2 border rounded-lg dark:bg-gray-700" 
+                  placeholder="your-id"
+                />
+                <p className="text-[10px] text-gray-500 mt-1">※IDを変更すると公開ページのURLも変わります</p>
               </div>
               <div>
                 <label className="block text-sm font-medium mb-1">表示名</label>
