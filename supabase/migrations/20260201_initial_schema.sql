@@ -39,6 +39,10 @@ ON public.profiles FOR SELECT USING (true);
 CREATE POLICY "Users can update their own profile" 
 ON public.profiles FOR UPDATE USING (auth.uid() = id);
 
+-- Users can insert their own profile
+CREATE POLICY "Users can insert their own profile" 
+ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
+
 -- Links Policies
 -- Everyone can view links
 CREATE POLICY "Links are viewable by everyone" 
@@ -55,3 +59,18 @@ ALTER PUBLICATION supabase_realtime ADD TABLE public.links;
 -- Indexing
 CREATE INDEX IF NOT EXISTS idx_profiles_username ON public.profiles(username);
 CREATE INDEX IF NOT EXISTS idx_links_user_id ON public.links(user_id);
+
+-- Storage configuration for Avatars
+-- Note: Run these in the SQL editor to set up the bucket
+/*
+INSERT INTO storage.buckets (id, name, public) VALUES ('avatars', 'avatars', true);
+
+CREATE POLICY "Avatar images are publicly accessible"
+ON storage.objects FOR SELECT USING (bucket_id = 'avatars');
+
+CREATE POLICY "Users can upload their own avatar"
+ON storage.objects FOR INSERT WITH CHECK (
+  bucket_id = 'avatars' AND 
+  auth.uid()::text = (storage.foldername(name))[1]
+);
+*/

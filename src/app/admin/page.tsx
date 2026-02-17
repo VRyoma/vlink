@@ -81,12 +81,12 @@ export default async function AdminDashboard() {
                 公開ページ
               </h2>
               <a
-                href="/"
+                href={`/${profile?.username}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-purple-600 dark:text-purple-300 hover:underline mt-1 inline-block"
               >
-                bio.vvil.jp を見る →
+                link.vvil.jp/{profile?.username} を見る →
               </a>
             </div>
           </div>
