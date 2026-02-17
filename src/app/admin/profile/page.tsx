@@ -107,12 +107,14 @@ export default function ProfileEditPage() {
 
     const { error } = await supabase
       .from('profiles')
-      .update({
+      .upsert({
+        id: profile?.id || (await supabase.auth.getUser()).data.user?.id,
+        username: profile?.username || (await supabase.auth.getUser()).data.user?.user_metadata.username,
         display_name: displayName || null,
         bio: bio || null,
         avatar_url: avatarUrl || null,
+        updated_at: new Date().toISOString(),
       })
-      .eq('id', profile.id)
 
     setLoading(false)
 
