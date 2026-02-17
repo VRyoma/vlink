@@ -13,7 +13,7 @@ export default function LoginPage() {
   const [successMessage, setSuccessMessage] = useState('')
   const [loading, setLoading] = useState(false)
 
-  // Check for error param from failed OAuth callback
+  // Check for error param from failed OAuth callback or registration
   useEffect(() => {
     const errorParam = searchParams.get('error')
     if (errorParam === 'auth_failed') {
@@ -25,81 +25,17 @@ export default function LoginPage() {
     }
   }, [searchParams])
 
-  // Handle OAuth callback from hash fragment
-  useEffect(() => {
-    const handleOAuthCallback = async () => {
-      // Check if we have tokens in the URL hash (from OAuth redirect)
-      if (window.location.hash && window.location.hash.includes('access_token')) {
-        setLoading(true)
-        try {
-          // Parse the hash fragment to get tokens
-          const params = new URLSearchParams(window.location.hash.substring(1))
-          const accessToken = params.get('access_token')
-          const refreshToken = params.get('refresh_token')
-          const providerToken = params.get('provider_token')
-          const expiresIn = params.get('expires_in')
-
-          if (accessToken) {
-            // Set the session using the tokens
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken || '',
-            })
-
-            if (error) {
-              console.error('Session error:', error)
-              setError('ログインに失敗しました')
-              setLoading(false)
-              return
-            }
-
-            // Clear the hash from URL
-            window.history.replaceState({}, document.title, window.location.pathname)
-
-            // Fetch YouTube data if we have provider token
-            if (providerToken) {
-              try {
-                const youtubeData = await fetchYouTubeChannel(providerToken)
-                const { data: { user } } = await supabase.auth.getUser()
-
-                if (user) {
-                  await supabase.from('profiles').upsert({
-                    id: user.id,
-                    is_verified: true,
-                    youtube_channel_id: youtubeData.channelId,
-                    youtube_handle: youtubeData.handle,
-                    youtube_channel_url: `https://www.youtube.com/channel/${youtubeData.channelId}`,
-                    auth_provider: 'google',
-                    updated_at: new Date().toISOString(),
-                  })
-                }
-              } catch (error) {
-                console.error('Failed to fetch YouTube channel:', error)
-              }
-            }
-
-            // Redirect to admin page
-            router.push('/admin')
-          }
-        } catch (err) {
-          console.error('OAuth callback error:', err)
-          setError('ログイン処理中にエラーが発生しました')
-        } finally {
-          setLoading(false)
-        }
-      }
-    }
-
-  }, [router])
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setError('')
     setSuccessMessage('')
     setLoading(true)
 
+    // Handle ID login by converting to dummy email if necessary
+    const loginIdentifier = email.includes('@') ? email : `${email}@noemail.local`
+
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: loginIdentifier,
       password,
     })
 
@@ -112,6 +48,28 @@ export default function LoginPage() {
     router.push('/admin')
   }
 
+  const handleGoogleLogin = async () => {
+    setError('')
+    setLoading(true)
+
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/admin/auth/callback`,
+        scopes: 'email profile https://www.googleapis.com/auth/youtube.readonly',
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+        },
+      }
+    })
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-pink-100 via-purple-100 to-blue-100 dark:from-gray-900 dark:via-purple-900 dark:to-gray-900 flex items-center justify-center px-4">
       <div className="max-w-md w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl p-8">
@@ -122,15 +80,16 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-              メールアドレス
+              ID または メールアドレス
             </label>
             <input
               id="email"
-              type="email"
+              type="text"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+              placeholder="your-id"
             />
           </div>
 
@@ -168,6 +127,31 @@ export default function LoginPage() {
             {loading ? 'ログイン中...' : 'ログイン'}
           </button>
         </form>
+
+        <div className="mt-6">
+          <div className="relative">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-gray-300 dark:border-gray-600" />
+            </div>
+            <div className="relative flex justify-center text-sm">
+              <span className="px-2 bg-white dark:bg-gray-800 text-gray-500">または</span>
+            </div>
+          </div>
+
+          <button
+            onClick={handleGoogleLogin}
+            disabled={loading}
+            className="mt-6 w-full flex items-center justify-center gap-3 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600 text-gray-700 dark:text-white font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <svg className="w-5 h-5" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+              <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+              <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
+              <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+            </svg>
+            Googleでログイン
+          </button>
+        </div>
 
         <div className="mt-4 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
