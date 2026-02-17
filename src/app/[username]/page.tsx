@@ -5,6 +5,7 @@ import { Link, ExternalLink } from 'lucide-react'
 import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { VerifiedBadge } from '@/components/VerifiedBadge'
+import MfmRenderer from '@/components/MfmRenderer'
 
 function ProfileFallback() {
   return (
@@ -94,9 +95,9 @@ async function BioPage({ username }: { username: string }) {
 
             {/* Bio */}
             {profile.bio && (
-              <p className="text-gray-700 dark:text-gray-400 mt-3 px-4">
-                {profile.bio}
-              </p>
+              <div className="text-gray-700 dark:text-gray-400 mt-3 px-4">
+                <MfmRenderer text={profile.bio} />
+              </div>
             )}
           </div>
         </div>

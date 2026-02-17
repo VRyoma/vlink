@@ -4,7 +4,8 @@ import { useState, useEffect, useRef } from 'react'
 import { supabase } from '@/lib/supabase'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
-import { ArrowLeft, Save, Upload, User } from 'lucide-react'
+import { ArrowLeft, Save, Upload, User, Eye } from 'lucide-react'
+import MfmRenderer from '@/components/MfmRenderer'
 
 interface Profile {
   id: string
@@ -229,7 +230,7 @@ export default function ProfileEditPage() {
 
             <div>
               <label htmlFor="bio" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                自己紹介
+                自己紹介（MFM対応）
               </label>
               <textarea
                 id="bio"
@@ -237,8 +238,20 @@ export default function ProfileEditPage() {
                 onChange={(e) => setBio(e.target.value)}
                 rows={4}
                 className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 dark:bg-gray-700 dark:text-white"
+                placeholder="揺れる文字: $[shake text] / 虹色: $[rainbow text]"
               />
             </div>
+
+            {/* MFM Preview */}
+            {bio && (
+              <div className="mt-4 p-4 border border-dashed border-gray-300 dark:border-gray-600 rounded-lg">
+                <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                  <Eye className="w-3 h-3" />
+                  プレビュー（実際の表示）
+                </div>
+                <MfmRenderer text={bio} className="text-sm text-gray-700 dark:text-gray-300" />
+              </div>
+            )}
 
             <button
               type="submit"
