@@ -1,67 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { supabase } from '@/lib/supabase'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 
 export default function LoginPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-
-  // Handle OAuth callback from hash fragment
-  useEffect(() => {
-    const handleOAuthCallback = async () => {
-      // Check if we have tokens in the URL hash (from OAuth redirect)
-      if (window.location.hash && window.location.hash.includes('access_token')) {
-        setLoading(true)
-        try {
-          // Parse the hash fragment to get tokens
-          const params = new URLSearchParams(window.location.hash.substring(1))
-          const accessToken = params.get('access_token')
-          const refreshToken = params.get('refresh_token')
-          const providerToken = params.get('provider_token')
-          const expiresIn = params.get('expires_in')
-
-          if (accessToken) {
-            // Set the session using the tokens
-            const { data, error } = await supabase.auth.setSession({
-              access_token: accessToken,
-              refresh_token: refreshToken || '',
-            })
-
-            if (error) {
-              console.error('Session error:', error)
-              setError('ログインに失敗しました')
-              setLoading(false)
-              return
-            }
-
-            // Clear the hash from URL
-            window.history.replaceState({}, document.title, window.location.pathname)
-
-            // Redirect to admin page or callback for YouTube data
-            if (providerToken) {
-              // Go to callback to fetch YouTube data
-              router.push('/admin/auth/callback')
-            } else {
-              router.push('/admin')
-            }
-          }
-        } catch (err) {
-          console.error('OAuth callback error:', err)
-          setError('ログイン処理中にエラーが発生しました')
-        } finally {
-          setLoading(false)
-        }
-      }
-    }
-
-    handleOAuthCallback()
-  }, [router])
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -89,13 +37,12 @@ export default function LoginPage() {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
-        redirectTo: `${window.location.origin}/admin/login`,
+        redirectTo: `${window.location.origin}/admin/auth/callback`,
         scopes: 'email profile https://www.googleapis.com/auth/youtube.readonly',
         queryParams: {
           access_type: 'offline',
           prompt: 'consent',
         },
-        skipBrowserRedirect: false,
       }
     })
 

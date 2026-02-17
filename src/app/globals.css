@@ -24,3 +24,45 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* MFM Animations */
+@keyframes mfm-shake {
+  0% { transform: translate(0, 0) rotate(0deg); }
+  25% { transform: translate(2px, 2px) rotate(1deg); }
+  50% { transform: translate(-1px, -2px) rotate(-1deg); }
+  75% { transform: translate(-3px, 0) rotate(1deg); }
+  100% { transform: translate(0, 0) rotate(0deg); }
+}
+.mfm-shake {
+  display: inline-block;
+  animation: mfm-shake 0.5s infinite;
+}
+
+@keyframes mfm-rainbow {
+  0% { color: hsl(0, 100%, 50%); }
+  100% { color: hsl(360, 100%, 50%); }
+}
+.mfm-rainbow {
+  animation: mfm-rainbow 2s linear infinite;
+}
+
+@keyframes mfm-tada {
+  0% { transform: scale(1); }
+  10%, 20% { transform: scale(0.9) rotate(-3deg); }
+  30%, 50%, 70%, 90% { transform: scale(1.1) rotate(3deg); }
+  40%, 60%, 80% { transform: scale(1.1) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0); }
+}
+.mfm-tada {
+  display: inline-block;
+  animation: mfm-tada 1s infinite;
+}
+
+@keyframes mfm-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+.mfm-bounce {
+  display: inline-block;
+  animation: mfm-bounce 0.5s infinite;
+}
