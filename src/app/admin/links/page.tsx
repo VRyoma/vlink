@@ -160,6 +160,18 @@ export default function LinksManagePage() {
     if (!user) return
 
     if (editingLink.isNew) {
+      // Ensure profile exists before adding link (Foreign Key protection)
+      const { data: profile } = await supabase.from('profiles').select('id').eq('id', user.id).single()
+      
+      if (!profile) {
+        await supabase.from('profiles').insert({
+          id: user.id,
+          username: user.user_metadata.username || `user_${user.id.slice(0, 5)}`,
+          display_name: user.user_metadata.display_name || '新規ユーザー',
+          auth_provider: 'email'
+        })
+      }
+
       const { error } = await supabase.from('links').insert({
         user_id: user.id,
         title: editingLink.title!,
