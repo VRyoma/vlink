@@ -10,45 +10,27 @@ export async function checkAuth() {
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
       cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
+        getAll() {
+          return cookieStore.getAll()
         },
-        set(name: string, value: string, options: any) {
+        setAll(cookiesToSet) {
           try {
-            cookieStore.set({
-              name,
-              value,
-              ...options,
-              sameSite: 'lax',
-              secure: true,
-              httpOnly: true,
-              path: '/',
-            })
-          } catch (e) {
-            // Server component may not support set
-            console.warn('Cookie set not supported in server component')
-          }
-        },
-        remove(name: string, options: any) {
-          try {
-            cookieStore.set({
-              name,
-              value: '',
-              ...options,
-              maxAge: 0,
-              path: '/',
-            })
-          } catch (e) {
-            console.warn('Cookie remove not supported in server component')
+            cookiesToSet.forEach(({ name, value, options }) =>
+              cookieStore.set(name, value, options)
+            )
+          } catch {
+            // The `setAll` method was called from a Server Component.
+            // This can be ignored if you have middleware refreshing
+            // user sessions.
           }
         },
       },
     }
   )
 
-  const { data: { user } } = await supabase.auth.getUser()
+  const { data: { user }, error } = await supabase.auth.getUser()
 
-  if (!user) {
+  if (error || !user) {
     redirect('/admin/login')
   }
 
