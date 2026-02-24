@@ -168,8 +168,8 @@ export default function ProfileEditPage() {
 
     try {
       const fileExt = file.name.split('.').pop()
-      const fileName = `${profile.id}-${type}-${Math.random()}.${fileExt}`
-      const filePath = `user_assets/${fileName}`
+      const fileName = `${profile.id}-${type}-${Date.now()}.${fileExt}`
+      const filePath = `${fileName}`
 
       // Upload to 'avatars' bucket (reusing for all assets for now, or use generic 'uploads')
       const { error: uploadError } = await supabase.storage
