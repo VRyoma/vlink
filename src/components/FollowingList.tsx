@@ -57,9 +57,8 @@ export function FollowingList({ userId, className = '' }: FollowingListProps) {
         // 2. Extract profile data
         const users = followingData
           .map(item => item.profiles)
-          .filter((profile): profile is FollowingUser => 
-            profile !== null && typeof profile === 'object' && 'id' in profile
-          )
+          .filter(profile => profile !== null)
+          .map(p => p as unknown as FollowingUser)
 
         // 3. Check for mutual follows (Does the followed user also follow userId?)
         // Fetch list of users who follow userId (followers)
