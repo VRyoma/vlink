@@ -6,6 +6,7 @@ import { notFound } from 'next/navigation'
 import { Suspense } from 'react'
 import { VerifiedBadge } from '@/components/VerifiedBadge'
 import MfmRenderer from '@/components/MfmRenderer'
+import { Metadata } from 'next'
 
 const IconRenderer = ({ iconKey }: { iconKey: string | null }) => {
   if (!iconKey) return <Link className="w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -178,7 +179,7 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
   
   const { data: profile } = await supabase
     .from('profiles')
-    .select('display_name, bio')
+    .select('display_name, username, bio, avatar_url')
     .eq('username', resolvedParams.username)
     .single()
 
@@ -188,8 +189,34 @@ export async function generateMetadata({ params }: { params: Promise<{ username:
     }
   }
 
+  const title = `${profile.display_name || profile.username} | vbio`
+  const description = profile.bio || `${profile.display_name || profile.username}のリンク一覧`
+  const ogImage = profile.avatar_url || 'https://link.vvil.jp/og-default.png' // Fallback image needed
+
   return {
-    title: `${profile.display_name || resolvedParams.username} - リンク集`,
-    description: profile.bio || `${profile.display_name || resolvedParams.username}のリンク一覧`,
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      url: `https://link.vvil.jp/${profile.username}`,
+      siteName: 'vbio',
+      images: [
+        {
+          url: ogImage,
+          width: 400,
+          height: 400,
+          alt: `${profile.display_name}のプロフィール画像`,
+        },
+      ],
+      type: 'profile',
+      username: profile.username,
+    },
+    twitter: {
+      card: 'summary',
+      title,
+      description,
+      images: [ogImage],
+    },
   }
 }
