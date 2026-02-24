@@ -8,6 +8,7 @@ import { VerifiedBadge } from '@/components/VerifiedBadge'
 import MfmRenderer from '@/components/MfmRenderer'
 import { Metadata } from 'next'
 import { YouTubeSubscribeButton } from '@/components/YouTubeSubscribeButton'
+import { FollowingList } from '@/components/FollowingList'
 import FollowButton from '@/components/FollowButton'
 
 const IconRenderer = ({ iconKey }: { iconKey: string | null }) => {
@@ -160,6 +161,9 @@ async function BioPage({ username }: { username: string }) {
                   <MfmRenderer text={profile.bio} />
                 </div>
               )}
+            
+            {/* Following List (推しコレクション) */}
+            <FollowingList userId={profile.id} className="mt-2" />
             </div>
           </div>
 
