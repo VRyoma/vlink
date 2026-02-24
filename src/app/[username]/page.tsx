@@ -7,6 +7,8 @@ import { Suspense } from 'react'
 import { VerifiedBadge } from '@/components/VerifiedBadge'
 import MfmRenderer from '@/components/MfmRenderer'
 import { Metadata } from 'next'
+import { YouTubeSubscribeButton } from '@/components/YouTubeSubscribeButton'
+import FollowButton from '@/components/FollowButton'
 
 const IconRenderer = ({ iconKey }: { iconKey: string | null }) => {
   if (!iconKey) return <Link className="w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -61,12 +63,34 @@ async function BioPage({ username }: { username: string }) {
     notFound()
   }
 
+  // Temporary type assertion until migration is applied and types regenerated
+  const profileData = profile as Profile & { youtube_subscriber_count?: number }
+
   const { data: links } = await supabase
     .from('links')
     .select('*')
     .eq('user_id', profile.id)
     .eq('is_visible', true)
     .order('sort_order', { ascending: true })
+
+  // Check follow status
+  const { data: { user } } = await supabase.auth.getUser()
+  const currentUserId = user?.id || null
+  
+  let isFollowing = false
+  if (currentUserId && currentUserId !== profile.id) {
+    const { data, error } = await supabase
+      .from('follows')
+      .select('follower_id')
+      .eq('follower_id', currentUserId)
+      .eq('following_id', profile.id)
+      .single()
+    
+    // Ignore error if table doesn't exist yet (during migration)
+    if (!error && data) {
+      isFollowing = true
+    }
+  }
 
   const themeColor = profile.theme_color || '#ffffff'
   const backgroundUrl = profile.background_url
@@ -99,10 +123,10 @@ async function BioPage({ username }: { username: string }) {
               </div>
             )}
 
-            <div className="text-center">
+            <div className="text-center w-full">
               {/* Name with Verified Badge */}
               <div className="flex items-center justify-center gap-2">
-                <h1 className="text-2xl font-bold text-gray-900 drop-shadow-sm">
+                <h1 className="text-2xl font-bold text-gray-900 drop-shadow-sm break-words">
                   {profile.display_name || profile.username}
                 </h1>
                 {profile.is_verified && <VerifiedBadge size="lg" />}
@@ -112,22 +136,27 @@ async function BioPage({ username }: { username: string }) {
                 @{profile.username}
               </p>
 
-              {/* YouTube Link */}
-              {profile.youtube_channel_url && (
-                <a
-                  href={profile.youtube_channel_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 mt-3 text-red-600 hover:text-red-700 font-bold bg-white/80 px-3 py-1 rounded-full text-sm shadow-sm"
-                >
-                  <Youtube className="w-4 h-4" />
-                  YouTube チャンネル
-                </a>
-              )}
+              {/* Action Buttons */}
+              <div className="flex flex-wrap items-center justify-center gap-3 mt-4 mb-2">
+                {profile.youtube_channel_url && (
+                  <YouTubeSubscribeButton 
+                    channelUrl={profile.youtube_channel_url}
+                    subscriberCount={(profile as any).youtube_subscriber_count} 
+                  />
+                )}
+                
+                {currentUserId !== profile.id && (
+                  <FollowButton 
+                    targetUserId={profile.id}
+                    currentUserId={currentUserId}
+                    initialIsFollowing={isFollowing}
+                  />
+                )}
+              </div>
 
               {/* Bio */}
               {profile.bio && (
-                <div className="text-gray-800 mt-4 px-4 py-2 bg-white/40 backdrop-blur-md rounded-xl shadow-sm border border-white/20">
+                <div className="text-gray-800 mt-4 px-4 py-2 bg-white/40 backdrop-blur-md rounded-xl shadow-sm border border-white/20 text-left inline-block w-full">
                   <MfmRenderer text={profile.bio} />
                 </div>
               )}
