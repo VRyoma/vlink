@@ -10,6 +10,7 @@ import { Metadata } from 'next'
 import { YouTubeSubscribeButton } from '@/components/YouTubeSubscribeButton'
 import { FollowingList } from '@/components/FollowingList'
 import FollowButton from '@/components/FollowButton'
+import { OshiLinksList } from '@/components/OshiLinksList'
 
 const IconRenderer = ({ iconKey }: { iconKey: string | null }) => {
   if (!iconKey) return <Link className="w-4 h-4 text-gray-500 dark:text-gray-400" />
@@ -191,6 +192,11 @@ async function BioPage({ username }: { username: string }) {
               ))}
             </div>
           )}
+
+          {/* Oshi Links Section (Curated external links) */}
+          <div className="mt-8">
+            <OshiLinksList userId={profile.id} />
+          </div>
         </div>
       </div>
     </div>
