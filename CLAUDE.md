@@ -8,6 +8,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 The application is in Japanese and the README is also in Japanese.
 
+## Development Policy
+
+- **Compliance with Telecommunications Business Act (電気通信事業法)**:
+    - Do NOT implement direct messaging (DM) or chat features between users.
+    - Avoid features that intermediate communications between others, which would require legal registration/notification.
+    - Focus on "public profile" and "link aggregation" features only.
+    - As long as this policy is respected, feel free to propose and implement new features proactively.
+
 ## Development Commands
 
 ```bash
