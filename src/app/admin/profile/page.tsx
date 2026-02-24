@@ -137,7 +137,7 @@ export default function ProfileEditPage() {
         .from('profiles')
         .upsert({
           id: user.id,
-          username: profile.username || user.user_metadata.username,
+          // Removed redundant username property that was causing build error
           ...updateData
         }, { onConflict: 'id' })
 
