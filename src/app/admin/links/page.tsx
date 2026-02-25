@@ -166,29 +166,39 @@ export default function LinksManagePage() {
 
   // --- OGP Fetch Logic ---
   const handleFetchOgp = async () => {
-    if (!editingOshiLink?.url) return
+    let targetUrl = editingOshiLink?.url?.trim()
+    if (!targetUrl) return
+
+    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+      targetUrl = 'https://' + targetUrl
+      setEditingOshiLink(prev => prev ? { ...prev, url: targetUrl } : null)
+    }
+
     setOgpLoading(true)
 
     try {
       const res = await fetch('/api/ogp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ url: editingOshiLink.url }),
+        body: JSON.stringify({ url: targetUrl }),
       })
 
-      if (!res.ok) throw new Error('Failed to fetch OGP')
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        throw new Error(errData.error || 'Failed to fetch OGP')
+      }
       
       const data = await res.json()
-      setEditingOshiLink(prev => ({
+      setEditingOshiLink(prev => prev ? {
         ...prev,
-        title: data.title || prev?.title || '',
-        description: data.description || prev?.description || '',
-        image_url: data.image || prev?.image_url || '',
-        site_name: data.site_name || prev?.site_name || '',
-      }))
-    } catch (error) {
+        title: data.title || prev.title || '',
+        description: data.description || prev.description || '',
+        image_url: data.image || prev.image_url || '',
+        site_name: data.site_name || prev.site_name || '',
+      } : null)
+    } catch (error: any) {
       console.error('OGP Error:', error)
-      alert('情報の取得に失敗しました。URLを確認してください。')
+      alert(`情報の取得に失敗しました: ${error.message || 'URLを確認してください'}`)
     } finally {
       setOgpLoading(false)
     }

@@ -11,7 +11,18 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'URL is required' }, { status: 400 })
     }
 
-    const { result } = await ogs({ url: url })
+    let targetUrl = url.trim()
+    if (!targetUrl.startsWith('http://') && !targetUrl.startsWith('https://')) {
+      targetUrl = 'https://' + targetUrl
+    }
+
+    try {
+      new URL(targetUrl)
+    } catch (e) {
+      return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 })
+    }
+
+    const { result } = await ogs({ url: targetUrl })
 
     if (!result.success) {
       return NextResponse.json({ error: 'Failed to fetch OGP' }, { status: 400 })
@@ -29,7 +40,7 @@ export async function POST(req: Request) {
       title: result.ogTitle || result.twitterTitle,
       description: result.ogDescription || result.twitterDescription,
       image: image,
-      site_name: result.ogSiteName || new URL(url).hostname,
+      site_name: result.ogSiteName || new URL(targetUrl).hostname,
     })
   } catch (error) {
     console.error('OGP Fetch Error:', error)
