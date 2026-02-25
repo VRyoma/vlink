@@ -1,7 +1,5 @@
 import { NextResponse } from 'next/server'
 
-export const runtime = 'edge'
-
 function decodeHTMLEntities(text: string) {
   if (!text) return ''
   return text
