@@ -1,7 +1,17 @@
 import { NextResponse } from 'next/server'
-import ogs from 'open-graph-scraper'
 
-export const runtime = 'nodejs' 
+export const runtime = 'edge'
+
+function decodeHTMLEntities(text: string) {
+  if (!text) return ''
+  return text
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&#x27;/g, "'")
+}
 
 export async function POST(req: Request) {
   try {
@@ -22,28 +32,48 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid URL format' }, { status: 400 })
     }
 
-    const { result } = await ogs({ url: targetUrl })
+    const response = await fetch(targetUrl, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (compatible; Discordbot/2.0; +https://discordapp.com)',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+        'Accept-Language': 'ja,en-US;q=0.9,en;q=0.8'
+      },
+      redirect: 'follow',
+      next: { revalidate: 3600 }
+    })
 
-    if (!result.success) {
-      return NextResponse.json({ error: 'Failed to fetch OGP' }, { status: 400 })
+    if (!response.ok) {
+      return NextResponse.json({ error: `Failed to fetch URL (${response.status})` }, { status: 400 })
     }
 
-    // Safely extract image
-    let image = null
-    if (result.ogImage && result.ogImage.length > 0) {
-      image = result.ogImage[0].url
-    } else if (result.twitterImage && result.twitterImage.length > 0) {
-      image = result.twitterImage[0].url
+    const html = await response.text()
+
+    const getMetaTag = (name: string) => {
+      // name or property
+      const regex = new RegExp(`<meta(?:\\s+[^>]*)*(?:name|property)=['"]${name}['"](?:\\s+[^>]*)*content=['"]([^'"]*)['"]`, 'i')
+      const match = html.match(regex)
+      if (match) return match[1]
+      
+      const regexReverse = new RegExp(`<meta(?:\\s+[^>]*)*content=['"]([^'"]*)['"](?:\\s+[^>]*)*(?:name|property)=['"]${name}['"]`, 'i')
+      const matchReverse = html.match(regexReverse)
+      return matchReverse ? matchReverse[1] : null
     }
+
+    const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i)
+    
+    const title = getMetaTag('og:title') || getMetaTag('twitter:title') || (titleMatch ? titleMatch[1] : '')
+    const description = getMetaTag('og:description') || getMetaTag('twitter:description') || getMetaTag('description') || ''
+    const image = getMetaTag('og:image') || getMetaTag('twitter:image') || ''
+    const site_name = getMetaTag('og:site_name') || new URL(targetUrl).hostname
 
     return NextResponse.json({
-      title: result.ogTitle || result.twitterTitle,
-      description: result.ogDescription || result.twitterDescription,
-      image: image,
-      site_name: result.ogSiteName || new URL(targetUrl).hostname,
+      title: decodeHTMLEntities(title),
+      description: decodeHTMLEntities(description),
+      image: decodeHTMLEntities(image),
+      site_name: decodeHTMLEntities(site_name),
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('OGP Fetch Error:', error)
-    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
+    return NextResponse.json({ error: 'Internal Server Error: ' + (error.message || '') }, { status: 500 })
   }
 }
